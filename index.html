@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aman Online Service - Complete Portal</title>
+
+    <!-- External JS Libraries for PDF & QR Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        body {
+            background-color: #12181f;
+            color: #ffffff;
+            padding: 12px;
+            padding-bottom: 90px;
+        }
+        .header {
+            text-align: center;
+            padding: 16px;
+            background-color: #1e2631;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #007bff;
+        }
+        .header h1 {
+            color: #007bff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header p {
+            color: #b0bec5;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .category-title {
+            color: #007bff;
+            font-size: 15px;
+            margin: 18px 0 8px 0;
+            border-left: 4px solid #007bff;
+            padding-left: 8px;
+            font-weight: bold;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+        .service-card {
+            background: #1a222d;
+            border: 1px solid #2a3545;
+            border-radius: 10px;
+            padding: 10px 4px;
+            text-align: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 90px;
+        }
+        .service-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            background: #222c3a;
+        }
+        .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .title {
+            font-size: 10.5px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .badge {
+            background: #007bff;
+            color: #fff;
+            font-size: 7.5px;
+            padding: 1px 4px;
+            border-radius: 6px;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        .badge-new {
+            background: #dc3545;
+        }
+        .badge-ai {
+            background: #6f42c1;
+        }
+
+        /* TOOL CONTAINERS */
+        .tool-box {
+            background: #1e2631;
+            border: 1px solid #007bff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 12px;
+            display: none;
+        }
+        .tool-box h3 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .tool-box input, .tool-box select, .tool-box button, .tool-box textarea {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 13px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .tool-box button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: auto;
+        }
+
+        /* PREVIEW AREAS */
+        #print-area {
+            background: white;
+            padding: 10mm;
+            display: grid;
+            grid-template-columns: repeat(6, 3.2cm);
+            gap: 3mm 4mm;
+            justify-content: center;
+            border: 1px dashed #ccc;
+            min-height: 120px;
+            margin-top: 10px;
+        }
+        .passport-photo {
+            width: 3.2cm;
+            height: 4.2cm;
+            object-fit: cover;
+            border: 1px solid #000;
+        }
+        .preview-card {
+            background: #ffffff;
+            color: #000000;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            max-width: 450px;
+        }
+
+        /* WHATSAPP BUTTON */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 1000;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area *, .printable-section, .printable-section * { visibility: visible; }
+            #print-area { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 210mm;
+                padding: 8mm; 
+                display: grid;
+                grid-template-columns: repeat(6, 3.2cm);
+                gap: 3mm 4mm;
+                border: none; 
+                margin: 0; 
+            }
+            .passport-photo { 
+                width: 3.2cm; 
+                height: 4.2cm; 
+                page-break-inside: avoid; 
+            }
+            @page { size: A4 portrait; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Aman Online Service</h1>
+        <p>All-in-One Cyber Cafe Services & Utility Portal</p>
+    </div>
+
+    <!-- 1. PHOTO PRINT TOOLS -->
+    <div class="category-title">Photo Print Tools</div>
+    <div class="grid-container">
+        <div class="service-card" onclick="showTool('bgRemove')">
+            <span class="badge badge-new">NEW</span>
+            <div class="icon">🖼️</div>
+            <div class="title">Remove BG</div>
+        </div>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <span class="badge badge-new">NEW</span>
+            <div class="icon">🖨️</div>
+            <div class="title">A4 Photo Print</div>
+        </div>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <span class="badge badge-new">NEW</span>
+            <div class="icon">🖼️</div>
+            <div class="title">4x6 Photo Print</div>
+        </div>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <span class="badge badge-new">NEW</span>
+            <div class="icon">🖼️</div>
+            <div class="title">4x6 Photos On A4</div>
+        </div>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <span class="badge badge-new">NEW</span>
+            <div class="icon">📜</div>
+            <div class="title">Notary Photo Maker</div>
+        </div>
+        <div class="service-card" onclick="showTool('jointPhoto')">
+            <span class="badge badge-new">NEW</span>
+            <div class="icon">👫</div>
+            <div class="title">Joint Photo Maker</div>
+        </div>
+    </div>
+
+    <!-- 2. CREATIVE DESIGN STUDIO -->
+    <div class="category-title">Creative Design Studio</div>
+    <div class="grid-container">
+        <div class="service-card" onclick="showTool('internalMaker')">
+            <div class="icon">📄</div>
+            <div class="title">Pro Resume Maker</div>
+        </div>
+        <div class="service-card" onclick="showTool('marriageBiodata')">
+            <div class="icon">💌</div>
+            <div class="title">Marriage Biodata</div>
+        </div>
+        <div class="service-card" onclick="showTool('idCardMaker')">
+            <div class="icon">🪪</div>
+            <div class="title">Pro ID Maker</div>
+        </div>
+        <div class="service-card" onclick="showTool('shopBanner')">
+            <div class="icon">🖼️</div>
+            <div class="title">Pro Poster Maker</div>
+        </div>
+        <div class="service-card" onclick="showTool('internalMaker')">
+            <div class="icon">📋</div>
+            <div class="title">Application Maker</div>
+        </div>
+        <div class="service-card" onclick="showTool('shopBanner')">
+            <div class="icon">📷</div>
+            <div class="title">Shop Banner Maker</div>
+        </div>
+    </div>
+
+    <!-- 3. SMART PDF & IMAGE TOOLS -->
+    <div class="category-title">Smart PDF & Image Tools</div>
+    <div class="grid-container">
+        <div class="service-card" onclick="showTool('jpg2pdf')">
+            <span class="badge">BUILT-IN</span>
+            <div class="icon">🖼️➡️📄</div>
+            <div class="title">JPG To PDF</div>
+        </div>
+        <div class="service-card" onclick="showTool('jpg2pdf')">
+            <span class="badge">BUILT-IN</span>
+            <div class="icon">📄➡️🖼️</div>
+            <div class="title">PDF To JPG</div>
+        </div>
+        <div class="service-card" onclick="showTool('jpg2pdf')">
+            <span class="badge">BUILT-IN</span>
+            <div class="icon">🖼️➡️📄</div>
+            <div class="title">PNG To PDF</div>
+        </div>
+        <div class="service-card" onclick="showTool('jpg2pdf')">
+            <span class="badge">BUILT-IN</span>
+            <div class="icon">🔄</div>
+            <div class="title">PNG To JPG</div>
+        </div>
+        <div class="service-card" onclick="showTool('deletePdf')">
+            <span class="badge">BUILT-IN</span>
+            <div class="icon">🗑️</div>
+            <div class="title">Delete PDF Page</div>
+        </div>
+        <div class="service-card" onclick="showTool('mergePdf')">
+            <span class="badge">BUILT-IN</span>
+            <div class="icon">📑</div>
+            <div class="title">Merge PDF</div>
+        </div>
+    </div>
+
+    <!-- 4. UTILITIES, JOBS & AUTO PRINT -->
+    <div class="category-title">Utilities, Jobs & Auto Print</div>
+    <div class="grid-container">
+        <a href="https://www.sarkariresult.com/" target="_blank" class="service-card">
+            <span class="badge badge-new">HOT</span>
+            <div class="icon">💼</div>
+            <div class="title">Latest Jobs</div>
+        </a>
+        <div class="service-card" onclick="showTool('internalMaker')">
+            <div class="icon">📝</div>
+            <div class="title">Mock Test</div>
+        </div>
+        <div class="service-card" onclick="showTool('pvcCrop')">
+            <span class="badge badge-ai">AI</span>
+            <div class="icon">🖨️</div>
+            <div class="title">AI Document Crop</div>
+        </div>
+        <div class="service-card" onclick="showTool('idCardMaker')">
+            <div class="icon">🪪</div>
+            <div class="title">ID Card Print</div>
+        </div>
+        <div class="service-card" onclick="showTool('pvcCrop')">
+            <span class="badge badge-ai">✂️</span>
+            <div class="icon">✂️</div>
+            <div class="title">PVC Auto Crop</div>
+        </div>
+        <div class="service-card" onclick="showTool('autoPrint')">
+            <div class="icon">🖨️</div>
+            <div class="title">Auto Print</div>
+        </div>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <span class="badge">AUTO</span>
+            <div class="icon">👤</div>
+            <div class="title">Passport Photo</div>
+        </div>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <div class="icon">🖼️</div>
+            <div class="title">Photo Crop & Resize</div>
+        </div>
+        <div class="service-card" onclick="showTool('internalMaker')">
+            <div class="icon">📄</div>
+            <div class="title">Resume/CV</div>
+        </div>
+        <div class="service-card" onclick="showTool('internalMaker')">
+            <div class="icon">📌</div>
+            <div class="title">New Service Post</div>
+        </div>
+        <div class="service-card" onclick="showTool('paymentQr')">
+            <div class="icon">📲</div>
+            <div class="title">Payment Lock QR</div>
+        </div>
+        <div class="service-card" onclick="showTool('mergePdf')">
+            <div class="icon">📁</div>
+            <div class="title">Document Album</div>
+        </div>
+    </div>
+
+    <!-- 5. PORTAL SERVICES (GOVERNMENT ID & SCHEMES) -->
+    <div class="category-title">Portal Services (Govt & ID)</div>
+    <div class="grid-container">
+        <a href="https://censusindia.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏛️</div>
+            <div class="title">Census Of India</div>
+        </a>
+        <a href="https://myaadhaar.uidai.gov.in/" target="_blank" class="service-card">
+            <span class="badge">BETA</span>
+            <div class="icon">🆔</div>
+            <div class="title">Aadhaar Beta Service</div>
+        </a>
+        <a href="https://uidai.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🆔</div>
+            <div class="title">Aadhaar (UIDAI Link)</div>
+        </a>
+        <a href="https://ictseva.com/portallogin/dashboard" target="_blank" class="service-card">
+            <span class="badge">AGENCY</span>
+            <div class="icon">💳</div>
+            <div class="title">PAN Card (ICTSEVA)</div>
+        </a>
+        <a href="https://voters.eci.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🗳️</div>
+            <div class="title">Voter ID (NVSP)</div>
+        </a>
+        <a href="https://setu.pmjay.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏥</div>
+            <div class="title">Ayushman Bharat</div>
+        </a>
+        <a href="https://parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚗</div>
+            <div class="title">Driving Licence</div>
+        </a>
+        <a href="https://parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚘</div>
+            <div class="title">RC Service</div>
+        </a>
+    </div>
+
+    <!-- IN-BUILT WORKING TOOL BOXES -->
+
+    <!-- 1. PAYMENT LOCK QR TOOL -->
+    <div id="box-paymentQr" class="tool-box">
+        <h3>Payment Lock QR Generator</h3>
+        <input type="text" id="upiId" placeholder="Enter UPI ID (e.g. 9006034892@paytm)" style="color:#000;"><br>
+        <input type="number" id="upiAmount" placeholder="Enter Amount (₹)" style="color:#000;"><br>
+        <button onclick="generateUPIQR()">Generate Payment QR</button>
+        <div id="qrcode" style="margin-top:15px; background:white; padding:10px; display:inline-block;"></div>
+    </div>
+
+    <!-- 2. AUTO PRINT TOOL -->
+    <div id="box-autoPrint" class="tool-box">
+        <h3>Instant Auto Print Studio</h3>
+        <input type="file" id="autoPrintFile" accept="image/*,application/pdf" onchange="previewPrintFile(event)"><br>
+        <div id="autoPrintPreview" style="margin-top:10px; max-width:300px;"></div>
+        <button style="background:#17a2b8; margin-top:10px;" onclick="window.print()">Print Document Now</button>
+    </div>
+
+    <!-- 3. PVC AUTO CROP & ID CARD PRINT TOOL -->
+    <div id="box-pvcCrop" class="tool-box">
+        <h3>PVC / ID Card Auto Crop Studio</h3>
+        <label>Front Side Photo:</label><br>
+        <input type="file" id="pvcFront" accept="image/*"><br>
+        <label>Back Side Photo:</label><br>
+        <input type="file" id="pvcBack" accept="image/*"><br>
+        <button onclick="generatePVCCard()">Crop & Set to PVC Size</button>
+        <div id="pvcPrintArea" class="printable-section" style="display:flex; gap:10px; margin-top:15px; background:white; padding:10px;">
+            <div id="frontPreview" style="width:8.5cm; height:5.4cm; border:1px solid #000; display:flex; align-items:center; justify-content:center; color:#888;">Front Side</div>
+            <div id="backPreview" style="width:8.5cm; height:5.4cm; border:1px solid #000; display:flex; align-items:center; justify-content:center; color:#888;">Back Side</div>
+        </div>
+        <button style="background:#17a2b8; margin-top:10px;" onclick="window.print()">Print PVC Sheet</button>
+    </div>
+
+    <!-- 4. ID CARD PRINT MAKER -->
+    <div id="box-idCardMaker" class="tool-box">
+        <h3>Pro ID Card Maker</h3>
+        <input type="text" id="idName" placeholder="Full Name" style="color:#000;"><br>
+        <input type="text" id="idRole" placeholder="Designation / Role" style="color:#000;"><br>
+        <input type="text" id="idNo" placeholder="ID Number / Mobile" style="color:#000;"><br>
+        <input type="file" id="idPhoto" accept="image/*"><br>
+        <button onclick="generateIDCard()">Generate Pro ID Card</button>
+        <div id="idCardResult" class="preview-card" style="display:none; border:2px solid #007bff; text-align:center;">
+            <div id="idCardImgHolder"></div>
+            <h2 id="resName" style="color:#007bff; margin-top:5px;"></h2>
+            <p id="resRole" style="font-weight:bold;"></p>
+            <p id="resNo" style="font-size:12px; color:#555;"></p>
+        </div>
+    </div>
+
+    <!-- 5. SHOP BANNER & POSTER MAKER -->
+    <div id="box-shopBanner" class="tool-box">
+        <h3>Shop Banner & Poster Maker</h3>
+        <input type="text" id="shopTitle" placeholder="Shop Name / Event Title" style="color:#000;"><br>
+        <input type="text" id="shopSub" placeholder="Services / Subtitle" style="color:#000;"><br>
+        <input type="text" id="shopContact" placeholder="Contact Number & Address" style="color:#000;"><br>
+        <button onclick="generateShopBanner()">Create Banner</button>
+        <div id="bannerResult" class="preview-card" style="display:none; background:#007bff; color:white; text-align:center; padding:20px;">
+            <h1 id="bTitle" style="font-size:24px; text-transform:uppercase;"></h1>
+            <p id="bSub" style="margin:10px 0; font-size:14px;"></p>
+            <p id="bContact" style="background:#fff; color:#000; padding:5px; font-weight:bold;"></p>
+        </div>
+    </div>
+
+    <!-- 6. MARRIAGE BIODATA MAKER -->
+    <div id="box-marriageBiodata" class="tool-box">
+        <h3>Marriage Biodata Maker</h3>
+        <input type="text" id="mbName" placeholder="Full Name" style="color:#000;"><br>
+        <input type="text" id="mbDob" placeholder="Date of Birth & Time" style="color:#000;"><br>
+        <input type="text" id="mbEdu" placeholder="Education / Occupation" style="color:#000;"><br>
+        <input type="text" id="mbFamily" placeholder="Father Name & Contact" style="color:#000;"><br>
+        <button onclick="generateBiodata()">Generate Biodata</button>
+        <div id="biodataResult" class="preview-card" style="display:none; border:2px solid #dc3545; line-height:1.6;">
+            <h2 style="text-align:center; color:#dc3545; border-bottom:1px solid #ccc;">MARRIAGE BIODATA</h2>
+            <p><b>Name:</b> <span id="bioName"></span></p>
+            <p><b>DOB:</b> <span id="bioDob"></span></p>
+            <p><b>Education:</b> <span id="bioEdu"></span></p>
+            <p><b>Family Details:</b> <span id="bioFam"></span></p>
+        </div>
+    </div>
+
+    <!-- 7. JOINT PHOTO MAKER -->
+    <div id="box-jointPhoto" class="tool-box">
+        <h3>Joint / Couple Photo Maker</h3>
+        <label>First Person Photo:</label><br>
+        <input type="file" id="p1" accept="image/*"><br>
+        <label>Second Person Photo:</label><br>
+        <input type="file" id="p2" accept="image/*"><br>
+        <button onclick="makeJointPhoto()">Combine Joint Photo</button>
+        <div id="jointResult" style="margin-top:10px; display:flex; gap:5px; background:white; padding:10px; width:fit-content;"></div>
+    </div>
+
+    <!-- 8. PASSPORT PHOTO PRINT BOX (6 PER ROW) -->
+    <div id="box-passportMaker" class="tool-box">
+        <h3>Photo Crop & Print Studio</h3>
+        <input type="file" id="imageInput" accept="image/*">
+        <label style="display:block; margin-top:8px;">Print Quantity:</label>
+        <select id="photoCount" style="color:#000;">
+            <option value="6">6 Photos (1 Line - A4)</option>
+            <option value="12">12 Photos (2 Lines - A4)</option>
+            <option value="18">18 Photos (3 Lines - A4)</option>
+            <option value="24">24 Photos (4 Lines - A4)</option>
+            <option value="30">30 Photos (Full A4 Sheet)</option>
+        </select>
+        <div style="margin-top:10px;">
+            <button onclick="generatePhotos()">Set Photos</button>
+            <button style="background:#17a2b8;" onclick="window.print()">Print Now</button>
+        </div>
+        <div id="print-area">
+            <p style="color: #888; grid-column: span 6; text-align: center; margin-top: 30px;">
+                Photo upload karke "Set Photos" par click karein.
+            </p>
+        </div>
+    </div>
+
+    <!-- OTHER PDF TOOLS -->
+    <div id="box-jpg2pdf" class="tool-box">
+        <h3>Image to PDF Converter</h3>
+        <input type="file" id="jpgInput" accept="image/*" multiple><br>
+        <button onclick="convertJpgToPdf()">PDF Banyein & Download Karein</button>
+    </div>
+
+    <div id="box-mergePdf" class="tool-box">
+        <h3>Merge Multiple PDFs</h3>
+        <input type="file" id="mergeInput" accept="application/pdf" multiple><br>
+        <button onclick="mergePDFs()">PDFs Merge Karein</button>
+    </div>
+
+    <div id="box-deletePdf" class="tool-box">
+        <h3>Delete PDF Page</h3>
+        <input type="file" id="deletePdfInput" accept="application/pdf"><br>
+        <label>Page Number: </label>
+        <input type="number" id="pageToDelete" placeholder="e.g. 1" style="width: 80px; color: #000;"><br>
+        <button onclick="deletePdfPage()">Page Hataiayein</button>
+    </div>
+
+    <!-- WHATSAPP FLOATING BUTTON -->
+    <a href="https://wa.me/919006034892?text=Hello%20Aman%20Online%20Service,%20mujhe%20help%20chahiye" target="_blank" class="whatsapp-float">
+        <span>💬 Help & Support</span>
+    </a>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        function showTool(toolId) {
+            document.querySelectorAll('.tool-box').forEach(box => box.style.display = 'none');
+            const target = document.getElementById('box-' + toolId);
+            if(target) {
+                target.style.display = 'block';
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // 1. Payment QR Generator
+        function generateUPIQR() {
+            const upi = document.getElementById('upiId').value;
+            const amt = document.getElementById('upiAmount').value;
+            const qrd = document.getElementById('qrcode');
+            qrd.innerHTML = '';
+            if(!upi) return alert('Kripya UPI ID bhrein!');
+            const url = `upi://pay?pa=${upi}&pn=AmanService&am=${amt}&cu=INR`;
+            new QRCode(qrd, { text: url, width: 128, height: 128 });
+        }
+
+        // 2. Auto Print Preview
+        function previewPrintFile(e) {
+            const holder = document.getElementById('autoPrintPreview');
+            holder.innerHTML = '';
+            const file = e.target.files[0];
+            if(file && file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.style.width = '100%';
+                holder.appendChild(img);
+            }
+        }
+
+        // 3. PVC Card Crop Generator
+        function generatePVCCard() {
+            const f = document.getElementById('pvcFront').files[0];
+            const b = document.getElementById('pvcBack').files[0];
+            if(f) {
+                document.getElementById('frontPreview').innerHTML = `<img src="${URL.createObjectURL(f)}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+            if(b) {
+                document.getElementById('backPreview').innerHTML = `<img src="${URL.createObjectURL(b)}" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+        }
+
+        // 4. ID Card Maker
+        function generateIDCard() {
+            document.getElementById('resName').innerText = document.getElementById('idName').value || 'Name';
+            document.getElementById('resRole').innerText = document.getElementById('idRole').value || 'Role';
+            document.getElementById('resNo').innerText = 'ID: ' + (document.getElementById('idNo').value || '0000');
+            const photo = document.getElementById('idPhoto').files[0];
+            const holder = document.getElementById('idCardImgHolder');
+            holder.innerHTML = '';
+            if(photo) {
+                holder.innerHTML = `<img src="${URL.createObjectURL(photo)}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">`;
+            }
+            document.getElementById('idCardResult').style.display = 'block';
+        }
+
+        // 5. Shop Banner Generator
+        function generateShopBanner() {
+            document.getElementById('bTitle').innerText = document.getElementById('shopTitle').value || 'Shop Name';
+            document.getElementById('bSub').innerText = document.getElementById('shopSub').value || 'Services';
+            document.getElementById('bContact').innerText = document.getElementById('shopContact').value || 'Contact Details';
+            document.getElementById('bannerResult').style.display = 'block';
+        }
+
+        // 6. Marriage Biodata
+        function generateBiodata() {
+            document.getElementById('bioName').innerText = document.getElementById('mbName').value;
+            document.getElementById('bioDob').innerText = document.getElementById('mbDob').value;
+            document.getElementById('bioEdu').innerText = document.getElementById('mbEdu').value;
+            document.getElementById('bioFam').innerText = document.getElementById('mbFamily').value;
+            document.getElementById('biodataResult').style.display = 'block';
+        }
+
+        // 7. Joint Photo
+        function makeJointPhoto() {
+            const p1 = document.getElementById('p1').files[0];
+            const p2 = document.getElementById('p2').files[0];
+            const res = document.getElementById('jointResult');
+            res.innerHTML = '';
+            if(p1 && p2) {
+                res.innerHTML = `<img src="${URL.createObjectURL(p1)}" style="width:3.2cm; height:4.2cm; object-fit:cover;">
+                                 <img src="${URL.createObjectURL(p2)}" style="width:3.2cm; height:4.2cm; object-fit:cover;">`;
+            } else {
+                alert('Dono photo chuniyega!');
+            }
+        }
+
+        // Passport Photo Generator (6 per row)
+        function generatePhotos() {
+            const input = document.getElementById('imageInput');
+            const count = parseInt(document.getElementById('photoCount').value);
+            const printArea = document.getElementById('print-area');
+
+            if (!input.files || !input.files[0]) return alert('Kripya photo upload karein!');
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                printArea.innerHTML = '';
+                for (let i = 0; i < count; i++) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'passport-photo';
+                    printArea.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        // PDF Functions
+        async function convertJpgToPdf() {
+            const files = document.getElementById('jpgInput').files;
+            if (files.length === 0) return alert("Kripya photo chunein!");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            for (let i = 0; i < files.length; i++) {
+                const imgData = await getBase64(files[i]);
+                if (i > 0) doc.addPage();
+                doc.addImage(imgData, 'JPEG', 10, 10, 190, 270);
+            }
+            doc.save('Aman_Online_Converted.pdf');
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function mergePDFs() {
+            const files = document.getElementById('mergeInput').files;
+            if (files.length < 2) return alert("Kam se kam 2 PDF chunein!");
+            const mergedPdf = await PDFLib.PDFDocument.create();
+            for (let i = 0; i < files.length; i++) {
+                const arrayBuffer = await files[i].arrayBuffer();
+                const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                copiedPages.forEach((page) => mergedPdf.addPage(page));
+            }
+            const mergedPdfBytes = await mergedPdf.save();
+            downloadBlob(mergedPdfBytes, "Aman_Online_Merged.pdf", "application/pdf");
+        }
+
+        async function deletePdfPage() {
+            const file = document.getElementById('deletePdfInput').files[0];
+            const pageNum = parseInt(document.getElementById('pageToDelete').value);
+            if (!file || !pageNum || pageNum < 1) return alert("Sahi jankari bhrein!");
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            if (pageNum > pdfDoc.getPageCount()) return alert("Galat page number!");
+            pdfDoc.removePage(pageNum - 1);
+            const modifiedPdfBytes = await pdfDoc.save();
+            downloadBlob(modifiedPdfBytes, "Aman_Online_Modified.pdf", "application/pdf");
+        }
+
+        function downloadBlob(data, fileName, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        }
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aman Online Service - Complete Portal</title>
+
+    <!-- External JS Libraries for PDF Tools -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        body {
+            background-color: #12181f;
+            color: #ffffff;
+            padding: 12px;
+            padding-bottom: 90px;
+        }
+        .header {
+            text-align: center;
+            padding: 16px;
+            background-color: #1e2631;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-bottom: 3px solid #007bff;
+        }
+        .header h1 {
+            color: #007bff;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header p {
+            color: #b0bec5;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+        .category-title {
+            color: #007bff;
+            font-size: 15px;
+            margin: 18px 0 8px 0;
+            border-left: 4px solid #007bff;
+            padding-left: 8px;
+            font-weight: bold;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 8px;
+        }
+        .service-card {
+            background: #1a222d;
+            border: 1px solid #2a3545;
+            border-radius: 10px;
+            padding: 10px 4px;
+            text-align: center;
+            text-decoration: none;
+            color: #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-height: 90px;
+        }
+        .service-card:hover {
+            border-color: #007bff;
+            transform: translateY(-2px);
+            background: #222c3a;
+        }
+        .icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .title {
+            font-size: 10.5px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .badge {
+            background: #007bff;
+            color: #fff;
+            font-size: 7.5px;
+            padding: 1px 4px;
+            border-radius: 6px;
+            margin-bottom: 3px;
+            font-weight: bold;
+        }
+        .badge-new {
+            background: #dc3545;
+        }
+        .badge-ai {
+            background: #6f42c1;
+        }
+
+        /* TOOL CONTAINERS */
+        .tool-box {
+            background: #1e2631;
+            border: 1px solid #007bff;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 12px;
+            display: none;
+        }
+        .tool-box h3 {
+            color: #007bff;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .tool-box input, .tool-box select, .tool-box button {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .tool-box button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* PRINT PREVIEW */
+        #print-area {
+            background: white;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            border: 1px dashed #ccc;
+            min-height: 120px;
+            margin-top: 10px;
+        }
+        .passport-photo {
+            width: 3.5cm;
+            height: 4.5cm;
+            object-fit: cover;
+            border: 1px solid #000;
+        }
+
+        /* WHATSAPP BUTTON */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25d366;
+            color: white;
+            border-radius: 50px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            z-index: 1000;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; border: none; padding: 0; margin: 0; gap: 5mm; }
+            .passport-photo { width: 3.5cm; height: 4.5cm; page-break-inside: avoid; }
+            @page { size: A4; margin: 10mm; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Aman Online Service</h1>
+        <p>All-in-One Cyber Cafe Services & Utility Portal</p>
+    </div
+
+    <!-- 4. UTILITIES, JOBS & AUTO PRINT -->
+    <div class="category-title">Utilities, Jobs & Auto Print</div>
+    <div class="grid-container">
+        <a href="https://www.sarkariresult.com/" target="_blank" class="service-card">
+            <span class="badge badge-new">HOT</span>
+            <div class="icon">💼</div>
+            <div class="title">Latest Jobs</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">📝</div>
+            <div class="title">Mock Test</div>
+        </a>
+        <a href="#" class="service-card">
+            <span class="badge badge-ai">AI</span>
+            <div class="icon">🖨️</div>
+            <div class="title">AI Document Crop</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">🪪</div>
+            <div class="title">ID Card Print</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">✂️</div>
+            <div class="title">PVC Auto Crop</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">🖨️</div>
+            <div class="title">Auto Print</div>
+        </a>
+        <div class="service-card" onclick="showTool('passportMaker')">
+            <span class="badge">AUTO</span>
+            <div class="icon">👤</div>
+            <div class="title">Passport Photo</div>
+        </div>
+        <a href="#" class="service-card">
+            <div class="icon">🖼️</div>
+            <div class="title">Photo Crop & Resize</div>
+        </a>
+        <a href="https://www.canva.com/" target="_blank" class="service-card">
+            <div class="icon">📄</div>
+            <div class="title">Resume/CV</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">📌</div>
+            <div class="title">New Service Post</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">📲</div>
+            <div class="title">Payment Lock QR</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">📁</div>
+            <div class="title">Document Album</div>
+        </a>
+    </div>
+
+    <!-- 5. PORTAL SERVICES (GOVERNMENT ID & SCHEMES) -->
+    <div class="category-title">Portal Services (Govt & ID)</div>
+    <div class="grid-container">
+        <a href="https://censusindia.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏛️</div>
+            <div class="title">Census Of India</div>
+        </a>
+        <a href="https://myaadhaar.uidai.gov.in/" target="_blank" class="service-card">
+            <span class="badge">BETA</span>
+            <div class="icon">🆔</div>
+            <div class="title">Aadhaar Beta Service</div>
+        </a>
+        <a href="https://uidai.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🆔</div>
+            <div class="title">Aadhaar (UIDAI Link)</div>
+        </a>
+        <a href="https://ictseva.com/portallogin/dashboard" target="_blank" class="service-card">
+            <span class="badge">AGENCY</span>
+            <div class="icon">💳</div>
+            <div class="title">PAN Card (ICTSEVA)</div>
+        </a>
+        <a href="https://voters.eci.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🗳️</div>
+            <div class="title">Voter ID (NVSP)</div>
+        </a>
+        <a href="https://setu.pmjay.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏥</div>
+            <div class="title">Ayushman Bharat</div>
+        </a>
+        <a href="https://parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚗</div>
+            <div class="title">Driving Licence</div>
+        </a>
+        <a href="https://parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚘</div>
+            <div class="title">RC Service</div>
+        </a>
+        <a href="https://parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏎️</div>
+            <div class="title">Vehicle Service</div>
+        </a>
+        <a href="https://crsorgi.gov.in/" target="_blank" class="service-card">
+            <div class="icon">📜</div>
+            <div class="title">Birth & Death Cert.</div>
+        </a>
+        <a href="https://echallan.parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🧾</div>
+            <div class="title">E-Challan</div>
+        </a>
+        <a href="https://eshram.gov.in/" target="_blank" class="service-card">
+            <div class="icon">👷</div>
+            <div class="title">E-Shram Card</div>
+        </a>
+        <a href="https://apaar.education.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🎓</div>
+            <div class="title">APAAR ID Card</div>
+        </a>
+        <a href="https://abha.abdm.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏥</div>
+            <div class="title">ABHA Health Card</div>
+        </a>
+        <a href="https://pmfby.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🌾</div>
+            <div class="title">PM Fasal Bima (PMFBY)</div>
+        </a>
+        <a href="https://pmaymis.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏠</div>
+            <div class="title">PMAY Gramin</div>
+        </a>
+        <a href="https://pmaymis.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏙️</div>
+            <div class="title">PMAY Urban</div>
+        </a>
+        <a href="https://www.epfindia.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏦</div>
+            <div class="title">EPFO Portal</div>
+        </a>
+    </div>
+
+    <!-- 6. GOVT SCHEMES & TAX SERVICES -->
+    <div class="category-title">Govt Schemes & Tax Services</div>
+    <div class="grid-container">
+        <a href="https://www.licindia.in/" target="_blank" class="service-card">
+            <div class="icon">🛡️</div>
+            <div class="title">LIC Services</div>
+        </a>
+        <a href="https://enam.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🌱</div>
+            <div class="title">E-NAM Agri Market</div>
+        </a>
+        <a href="https://pmsvanidhi.mohua.gov.in/" target="_blank" class="service-card">
+            <div class="icon">💰</div>
+            <div class="title">PM SVANidhi Yojana</div>
+        </a>
+        <a href="https://soilhealth.dac.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🌱</div>
+            <div class="title">Soil Health Card</div>
+        </a>
+        <a href="https://mkisan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">👨‍🌾</div>
+            <div class="title">MKisan Portal</div>
+        </a>
+        <a href="https://pmsuryaghar.gov.in/" target="_blank" class="service-card">
+            <div class="icon">☀️</div>
+            <div class="title">PM Surya Ghar</div>
+        </a>
+        <a href="https://udyamregistration.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🏭</div>
+            <div class="title">Udyam MSME Aadhaar</div>
+        </a>
+        <a href="https://scholarships.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🎓</div>
+            <div class="title">Scholarship (NSP)</div>
+        </a>
+        <a href="https://ceir.sot.gov.in/" target="_blank" class="service-card">
+            <div class="icon">📱</div>
+            <div class="title">Lost/Found Mobile</div>
+        </a>
+        <a href="https://www.indianrail.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚆</div>
+            <div class="title">Railway Service</div>
+        </a>
+        <a href="https://www.passportindia.gov.in/" target="_blank" class="service-card">
+            <div class="icon">✈️</div>
+            <div class="title">Passport Seva</div>
+        </a>
+        <a href="https://pmkisan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🌾</div>
+            <div class="title">PM Kisan Samman</div>
+        </a>
+        <a href="https://www.gst.gov.in/" target="_blank" class="service-card">
+            <div class="icon">📊</div>
+            <div class="title">GST Verification</div>
+        </a>
+        <a href="https://parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🛣️</div>
+            <div class="title">Checkpost / Road Tax</div>
+        </a>
+        <a href="https://vahan.parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚘</div>
+            <div class="title">Vahan Green Sewa</div>
+        </a>
+    </div>
+
+    <!-- 7. HELPLINE, GAS & UTILITY -->
+    <div class="category-title">Helpline, Gas & Utility</div>
+    <div class="grid-container">
+        <a href="https://puc.parivahan.gov.in/" target="_blank" class="service-card">
+            <div class="icon">📜</div>
+            <div class="title">PUC Service (Pollution)</div>
+        </a>
+        <a href="https://www.npci.org.in/" target="_blank" class="service-card">
+            <div class="icon">💳</div>
+            <div class="title">NPCI Portal</div>
+        </a>
+        <a href="https://consumerhelpline.gov.in/" target="_blank" class="service-card">
+            <div class="icon">👥</div>
+            <div class="title">Consumer Helpline</div>
+        </a>
+        <a href="https://www.ncs.gov.in/" target="_blank" class="service-card">
+            <div class="icon">💼</div>
+            <div class="title">Career Service (NCS)</div>
+        </a>
+        <a href="https://www.cibil.com/" target="_blank" class="service-card">
+            <div class="icon">📈</div>
+            <div class="title">Check CIBIL Score</div>
+        </a>
+        <a href="https://cx.indane.in/" target="_blank" class="service-card">
+            <div class="icon">🔥</div>
+            <div class="title">INDANE GAS</div>
+        </a>
+        <a href="https://myhpgas.in/" target="_blank" class="service-card">
+            <div class="icon">🔥</div>
+            <div class="title">HP GAS</div>
+        </a>
+        <a href="https://my.ebharatgas.com/" target="_blank" class="service-card">
+            <div class="icon">🔥</div>
+            <div class="title">BHARAT GAS</div>
+        </a>
+        <a href="https://swavlambancard.gov.in/" target="_blank" class="service-card">
+            <div class="icon">♿</div>
+            <div class="title">Unique Disability ID</div>
+        </a>
+        <a href="https://swachhbharatmission.gov.in/" target="_blank" class="service-card">
+            <div class="icon">🚽</div>
+            <div class="title">Swachh Bharat Yojana</div>
+        </a>
+        <a href="#" class="service-card">
+            <div class="icon">📱</div>
+            <div class="title">Fancy Mobile Number</div>
+        </a>
+    </div>
+
+    <!-- IN-BUILT TOOL BOXES -->
+    <div id="box-passportMaker" class="tool-box">
+        <h3>1-Click Passport Photo Maker</h3>
+        <input type="file" id="imageInput" accept="image/*">
+        <label style="margin-left: 8px;">संख्या:</label>
+        <select id="photoCount" style="color:#000;">
+            <option value="8">8 फोटो</option>
+            <option value="12">12 फोटो</option>
+            <option value="16">16 फोटो</option>
+            <option value="30">30 फोटो (A4 Sheet)</option>
+        </select>
+        <button onclick="generatePhotos()">फोटो सेट करें</button>
+        <button style="background:#17a2b8;" onclick="window.print()">Print Sheet</button>
+
+        <div id="print-area">
+            <p style="color: #888; width: 100%; text-align: center; margin-top: 30px;">
+                फोटो सेलेक्ट करके "फोटो सेट करें" पर क्लिक करें।
+            </p>
+        </div>
+    </div>
+
+    <!-- WHATSAPP FLOATING BUTTON -->
+    <a href="https://wa.me/919006034892?text=Hello%20Aman%20Online%20Service,%20mujhe%20help%20chahiye" target="_blank" class="whatsapp-float">
+        <span>💬 Help & Support</span>
+    </a>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        function showTool(toolId) {
+            document.querySelectorAll('.tool-box').forEach(box => box.style.display = 'none');
+            const target = document.getElementById('box-' + toolId);
+            if(target) {
+                target.style.display = 'block';
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function generatePhotos() {
+            const input = document.getElementById('imageInput');
+            const count = parseInt(document.getElementById('photoCount').value);
+            const printArea = document.getElementById('print-area');
+
+            if (!input.files || !input.files[0]) {
+                alert('कृपया फोटो अपलोड करें!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                printArea.innerHTML = '';
+                for (let i = 0; i < count; i++) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'passport-photo';
+                    printArea.appendChild(img);
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        async function convertJpgToPdf() {
+            const files = document.getElementById('jpgInput').files;
+            if (files.length === 0) return alert("कृपया फोटो चुनें!");
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            for (let i = 0; i < files.length; i++) {
+                const imgData = await getBase64(files[i]);
+                if (i > 0) doc.addPage();
+                doc.addImage(imgData, 'JPEG', 10, 10, 190, 270);
+            }
+            doc.save('Aman_Online_Converted.pdf');
+        }
+
+        function getBase64(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function mergePDFs() {
+            const files = document.getElementById('mergeInput').files;
+            if (files.length < 2) return alert("कम से कम 2 PDF चुनें!");
+            const mergedPdf = await PDFLib.PDFDocument.create();
+            for (let i = 0; i < files.length; i++) {
+                const arrayBuffer = await files[i].arrayBuffer();
+                const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                copiedPages.forEach((page) => mergedPdf.addPage(page));
+            }
+            const mergedPdfBytes = await mergedPdf.save();
+            downloadBlob(mergedPdfBytes, "Aman_Online_Merged.pdf", "application/pdf");
+        }
+
+        async function deletePdfPage() {
+            const file = document.getElementById('deletePdfInput').files[0];
+            const pageNum = parseInt(document.getElementById('pageToDelete').value);
+            if (!file || !pageNum || pageNum < 1) return alert("सही जानकारी भरें!");
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            if (pageNum > pdfDoc.getPageCount()) return alert("गलत पेज नंबर!");
+            pdfDoc.removePage(pageNum - 1);
+            const modifiedPdfBytes = await pdfDoc.save();
+            downloadBlob(modifiedPdfBytes, "Aman_Online_Modified.pdf", "application/pdf");
+        }
+
+        function downloadBlob(data, fileName, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = fileName;
+            link.click();
+        }
+    </script>
+</body>
+</html>
+<!-- Yeh wo pop-up box hai jo click karne par khulega -->
+<div id="toolModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: #1e293b; padding: 20px; border-radius: 10px; width: 80%; max-width: 500px; color: white; text-align: center; position: relative;">
+        <h2 id="modalTitle">Tool Name</h2>
+<p id="modalDesc">Yahan aapka tool ya form load hoga.</p>
+        <button onclick="closeTool()" style="background: red; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 15px;">Band Karein (Close)</button>
+    </div>
+</div>
+// Jab kisi bhi card par click hoga, yeh function chalega
+function openTool(toolName) {
+    // Modal ka title badal do
+    document.getElementById("modalTitle").innerText = toolName;
+    document.getElementById("modalDesc").innerText = toolName + " ka tool yahan khul raha hai...";
+    
+    // Modal ko screen par dikhao
+    document.getElementById("toolModal").style.display = "flex";
+}
+
+// Jab 'Band Karein' button par click hoga, toh yeh function chalega
+function closeTool() {
+    // Modal ko chupchaap band kar do
+    document.getElementById("toolModal").style.display = "none";
+}
